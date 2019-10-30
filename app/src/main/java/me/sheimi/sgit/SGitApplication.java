@@ -11,6 +11,7 @@ import org.acra.ReportingInteractionMode;
 import org.acra.annotation.ReportsCrashes;
 import org.eclipse.jgit.transport.CredentialsProvider;
 
+import me.sheimi.android.utils.NotificationUtils;
 import me.sheimi.android.utils.SecurePrefsException;
 import me.sheimi.android.utils.SecurePrefsHelper;
 import me.sheimi.sgit.preference.PreferenceHelper;
@@ -40,7 +41,7 @@ public class SGitApplication extends Application {
     public void onCreate() {
         super.onCreate();
 
-        mContext = getApplicationContext();
+        mContext = getApplicationContext(); // TODO: causes a memory leak, fix
         setAppVersionPref();
         mPrefsHelper = new PreferenceHelper(this);
         try {
@@ -49,6 +50,7 @@ public class SGitApplication extends Application {
         } catch (SecurePrefsException e) {
             Timber.e(e);
         }
+        NotificationUtils.Channels.instantiateNotificationChannelForGitOperations(this);
     }
 
 

@@ -201,4 +201,9 @@
     <string name="bitbucket.com" translatable="false">bitbucket.com</string>
     <string name="notabug.org" translatable="false">notabug.org</string>
     <string name="repository_already_present">Repository already present!</string>
+
+    <!-- Notification Channels -->
+    <string name="id_git_operations" translatable="false">git_operations</string>
+    <string name="title_git_operations" translatable="false">Git Operations</string> <!-- TODO: translate -->
+    <string name="message_git_operations" translatable="false">Shows while a git operation is occurring in the background</string> <!-- TODO: translate -->
 </resources>

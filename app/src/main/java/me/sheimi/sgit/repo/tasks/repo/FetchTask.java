@@ -1,10 +1,13 @@
 package me.sheimi.sgit.repo.tasks.repo;
 
+import com.manichord.mgit.repolist.RepoListActivity;
+
 import org.eclipse.jgit.api.FetchCommand;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.TransportException;
 import org.eclipse.jgit.transport.UsernamePasswordCredentialsProvider;
 
+import kotlin.jvm.functions.Function0;
 import me.sheimi.android.activities.SheimiFragmentActivity;
 import me.sheimi.sgit.R;
 import me.sheimi.sgit.database.models.Repo;
@@ -23,15 +26,26 @@ public class FetchTask extends RepoRemoteOpTask {
     }
 
     @Override
-    protected Boolean doInBackground(Void... params) {
-        boolean result = true;
-        for (final String remote : mRemotes) {
-            result = fetchRepo(remote) & result;
-            if (mCallback != null) {
-                result = mCallback.doInBackground(params) & result;
+    protected Boolean doInBackground(final Void... params) {
+        return doWhileShowingIndeterminateNotification(
+            "Fetching repository",
+            "In progress",
+            "Complete",
+            RepoListActivity.class,
+            new Function0<Boolean>() {
+                @Override
+                public Boolean invoke() {
+                    boolean result = true;
+                    for (final String remote : mRemotes) {
+                        result = fetchRepo(remote) & result;
+                        if (mCallback != null) {
+                            result = mCallback.doInBackground(params) & result;
+                        }
+                    }
+                    return result;
+                }
             }
-        }
-        return result;
+        );
     }
 
     @Override

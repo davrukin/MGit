@@ -1,6 +1,11 @@
 package me.sheimi.sgit.repo.tasks.repo;
 
+import android.app.PendingIntent;
+import android.app.TaskStackBuilder;
+import android.content.Intent;
 import android.support.annotation.StringRes;
+
+import com.manichord.mgit.repolist.RepoListActivity;
 
 import org.eclipse.jgit.api.CloneCommand;
 import org.eclipse.jgit.api.Git;
@@ -13,8 +18,12 @@ import org.eclipse.jgit.lib.ProgressMonitor;
 import java.io.File;
 import java.util.Locale;
 
+import javax.xml.validation.Validator;
+
+import kotlin.jvm.functions.Function0;
 import me.sheimi.android.utils.Profile;
 import me.sheimi.sgit.R;
+import me.sheimi.sgit.SGitApplication;
 import me.sheimi.sgit.database.RepoContract;
 import me.sheimi.sgit.database.models.Repo;
 import me.sheimi.sgit.ssh.SgitTransportCallback;
@@ -35,13 +44,26 @@ public class CloneTask extends RepoRemoteOpTask {
 
     @Override
     protected Boolean doInBackground(Void... v) {
-        boolean result = cloneRepo();
+        boolean result = doWhileShowingIndeterminateNotification(
+            "Cloning repository",
+            "In progress",
+            "Complete",
+            RepoListActivity.class,
+            new Function0<Boolean>() {
+                @Override
+                public Boolean invoke() {
+                    return cloneRepo();
+                }
+            }
+        );
+
         if (!result) {
             Timber.e("del repo. clone failed");
             mRepo.deleteRepoSync();
         } else if (mCallback != null) {
             result = mCallback.doInBackground(v) & result;
         }
+
         return result;
     }
 
@@ -59,7 +81,8 @@ public class CloneTask extends RepoRemoteOpTask {
     public boolean cloneRepo() {
         File localRepo = mRepo.getDir();
         CloneCommand cloneCommand = Git.cloneRepository()
-                .setURI(mRepo.getRemoteURL()).setCloneAllBranches(true)
+                .setURI(mRepo.getRemoteURL())
+                .setCloneAllBranches(true)
                 .setProgressMonitor(new RepoCloneMonitor())
                 .setTransportConfigCallback(new SgitTransportCallback())
                 .setDirectory(localRepo)
